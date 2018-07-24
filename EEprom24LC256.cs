@@ -40,7 +40,7 @@ public class EEprom24LC256
 
         if (str.Length < 10)
         { 
-            strlength = " " + str.Length.ToString();
+            strlength = "0" + str.Length.ToString();
          }
         else
         {
