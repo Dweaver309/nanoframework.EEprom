@@ -46,20 +46,25 @@ public class EEprom24LC256
         {
             strlength = str.Length.ToString();
         }
+        
+            // The addess in buffer 0 and 1
+            // Length in buffer 3 and 4
+            str = "00" + strlength + str;
 
-         // Length will be in buffer 3 and 4
-         str = "00" + strlength + str;
+            Console.WriteLine("String to encode: " + str);
 
-        Console.WriteLine("String: " + str);
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(str);
 
-        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(str);
+            // Set Write address as first 2 bytes, High + low 
+            buffer[0] = (Byte)(address >> 8);
 
-        buffer[0] = (Byte)(address >> 8);
-
-        buffer[1] = (Byte)(address & 0xFF);
+            buffer[1] = (Byte)(address & 0xFF);
           
-         EEprom.Write(buffer);
-         
+            EEprom.Write(buffer);
+
+            // Give thread time to write 
+            Thread.Sleep(20);
+
         }
 
         catch (Exception)
@@ -72,8 +77,7 @@ public class EEprom24LC256
     }
 
     /// <summary>
-    /// Read datalengh bytes at address
-    /// Get the string length that was saved in the first two bytes
+    /// Read data lengh bytes  
     /// Return the saved string
     // </summary>
     public static String Read(int address, int datalength = 64)
@@ -82,19 +86,13 @@ public class EEprom24LC256
         { 
 
             var Data = new byte[datalength];
-
-            Thread.Sleep(5);
-
-            //Requires two write read statements for the correct starting address to read
+          
+            // Clear the write buffer
+            EEprom.Write(null);
+            
             EEprom.Write(new[] { (Byte)(address >> 8), (Byte)(address & 0xFF) });
 
             EEprom.Read(Data);
-
-            Thread.Sleep(5);
-
-            EEprom.Write(new[] { (Byte)(address >> 8), (Byte)(address & 0xFF) });
-
-           EEprom.Read(Data);
 
             //Get the first char in the two byte length
             char flb = Convert.ToChar(Data[0]);
@@ -112,10 +110,12 @@ public class EEprom24LC256
             //Convert to integer
             int length = Convert.ToInt32(sl);
 
-         if (length > datalength)
-         {
-                length = datalength - 2;
-         }
+
+            // Bad read avoid exception
+        if (length > datalength)
+        {
+             length = datalength - 2;
+        }
        
             Console.WriteLine("Length " + length);
 
@@ -146,8 +146,7 @@ public class EEprom24LC256
 
         }
 
-
     }
 
-}
+    }
 
