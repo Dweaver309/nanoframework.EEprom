@@ -7,3 +7,8 @@ Read and Write to EEprom using nanoframework. The image below is from the SparkF
 
 ![ScreenShot](https://github.com/Dweaver309/EEProm/blob/master/eeprom_wiring.png)
 
+For more information see my post on hackster.i.o 
+
+https://www.hackster.io/dweaver309/eeprom-i2c-driver-for-nanoframework-718669
+
+
