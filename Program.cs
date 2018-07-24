@@ -13,7 +13,7 @@ namespace EEprom.driver
             
            str = EEprom24LC256.Read(EEprom24LC256.Address.SecondString);
 
-            Console.WriteLine(" Returned " + str);
+           Console.WriteLine("\r\nReturned " + str);
 
         }
     }
