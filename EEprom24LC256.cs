@@ -86,8 +86,7 @@ public class EEprom24LC256
         { 
 
             var Data = new byte[datalength];
-          
-            // Clear the write buffer
+                      
             EEprom.Write(null);
             
             EEprom.Write(new[] { (Byte)(address >> 8), (Byte)(address & 0xFF) });
