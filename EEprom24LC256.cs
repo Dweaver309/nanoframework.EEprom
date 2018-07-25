@@ -16,17 +16,17 @@ using System.Threading;
 public class EEprom24LC256
 {
     private static I2cDevice EEprom = I2cDevice.FromId("I2C1", new I2cConnectionSettings(0x54) { BusSpeed = I2cBusSpeed.StandardMode });
-   
+
     /// <summary>
     /// Structure to put addresses to write to and read from
     /// </summary>
     public struct Address
     {
         public static int FirstString = 64;
-        public static int SecondString = 128;
+        public static int SecondString = 256;
         public static int ThirdString = 192;
     }
- 
+
     /// <summary>
     /// Write string to address
     /// </summary>
@@ -35,18 +35,18 @@ public class EEprom24LC256
         try
         {
             Thread.Sleep(5);
-                  
+
             string strlength = String.Empty;
 
-        if (str.Length < 10)
-        { 
-            strlength = "0" + str.Length.ToString();
-         }
-        else
-        {
-            strlength = str.Length.ToString();
-        }
-        
+            if (str.Length < 10)
+            {
+                strlength = "0" + str.Length.ToString();
+            }
+            else
+            {
+                strlength = str.Length.ToString();
+            }
+
             // The addess in buffer 0 and 1
             // Length in buffer 3 and 4
             str = "00" + strlength + str;
@@ -59,36 +59,51 @@ public class EEprom24LC256
             buffer[0] = (Byte)(address >> 8);
 
             buffer[1] = (Byte)(address & 0xFF);
-          
+
             EEprom.Write(buffer);
-
+          
             // Give thread time to write 
-            Thread.Sleep(20);
-
+            WaitReady();
+          
         }
 
         catch (Exception)
         {
 
             Console.WriteLine("Error writing to eeprom");
-            
+
         }
 
     }
 
-    /// <summary>
-    /// Read data lengh bytes  
-    /// Return the saved string
-    // </summary>
-    public static String Read(int address, int datalength = 64)
-    {
-        try
-        { 
+        private static void WaitReady()
+        {
+            int count = 0;
+
+            // Wait for Acknowledge from eeprom by sending 0 length write until acknowledged or other error
+            // End anyway if slave not acknowledging, normaly slave starts to Ack after 4 or 5 count which means
+            // previous write is complete
+            while (count < 20)
+            {
+
+            I2cTransferResult res = EEprom.WritePartial(null);
+            
+            if (res.Status != I2cTransferStatus.SlaveAddressNotAcknowledged) break;
+            count++;
+            Thread.Sleep(1);  // Give time to other threads
+            }
+        }
+        /// <summary>
+        /// Read data lengh bytes  
+        /// Return the saved string
+        // </summary>
+        public static String Read(int address, int datalength = 64)
+        {
+            try
+            {
 
             var Data = new byte[datalength];
-                      
-            EEprom.Write(null);
-            
+                       
             EEprom.Write(new[] { (Byte)(address >> 8), (Byte)(address & 0xFF) });
 
             EEprom.Read(Data);
@@ -111,30 +126,30 @@ public class EEprom24LC256
 
 
             // Bad read avoid exception
-        if (length > datalength)
-        {
-             length = datalength - 2;
-        }
-       
+            if (length > datalength)
+            {
+                length = datalength - 2;
+            }
+
             Console.WriteLine("Length " + length);
 
             string rs = string.Empty;
 
-        //Start reading after the two byte saved length
-        for (int i = 2; i < length + 2; i++)
-        {
+            //Start reading after the two byte saved length
+            for (int i = 2; i < length + 2; i++)
+            {
 
-            char c = Convert.ToChar(Data[i]);
+                char c = Convert.ToChar(Data[i]);
 
-            rs = rs + c.ToString();
+                rs = rs + c.ToString();
 
-            Console.WriteLine("Read Adddress  " + address + " Char Read " + c.ToString());
+                Console.WriteLine("Read Adddress  " + address + " Char Read " + c.ToString());
 
-            address += 1;
+                address += 1;
 
-        }
+            }
 
-        return rs;
+            return rs;
 
         }
 
@@ -147,5 +162,6 @@ public class EEprom24LC256
 
     }
 
-    }
+}
+
 
