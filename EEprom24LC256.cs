@@ -62,7 +62,9 @@ public class EEprom24LC256
 
             EEprom.Write(buffer);
           
-            // Give thread time to write 
+            // Give thread time to write
+            Thread.Sleep(20);
+            
             WaitReady();
           
         }
