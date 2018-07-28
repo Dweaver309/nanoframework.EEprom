@@ -26,7 +26,7 @@ namespace nanoframework.I2C.driver
             Boolean Connect_EEprom = true;
 
             //Using SS1306 OLED display
-            Boolean Connect_OLED = true;
+            Boolean Connect_OLED = false;
 
             if (Connect_EEprom)
             {
